@@ -32,4 +32,9 @@ public class RentalService {
         logger.info("Saving new rental with name: {}", rental.getName());
         return rentalRepository.save(rental);
     }
+
+    public Rental updateRental(Rental rental) {
+        logger.info("Updating rental with ID: {}", rental.getId());
+        return rentalRepository.save(rental);
+    }
 }

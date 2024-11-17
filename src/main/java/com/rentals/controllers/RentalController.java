@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -30,6 +29,7 @@ public class RentalController {
 
     private static final Logger logger = LoggerFactory.getLogger(RentalController.class);
     private final RentalService rentalService;
+    private final Path uploadDir = Paths.get("uploads");
 
     public RentalController(RentalService rentalService) {
         this.rentalService = rentalService;
@@ -84,7 +84,6 @@ public class RentalController {
             String pictureUrl = null;
 
             if (picture != null && !picture.isEmpty()) {
-                Path uploadDir = Paths.get("uploads");
                 if (Files.notExists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
@@ -137,14 +136,47 @@ public class RentalController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<RentalResponse> updateRental(
+            @PathVariable Integer id,
+            @RequestParam("name") String name,
+            @RequestParam("surface") BigDecimal surface,
+            @RequestParam("price") BigDecimal price,
+            @RequestParam("description") String description
+    ) {
+        Rental existingRental = rentalService.findRentalById(id);
+        if (existingRental == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        existingRental.setName(name);
+        existingRental.setSurface(surface);
+        existingRental.setPrice(price);
+        existingRental.setDescription(description);
+        existingRental.setUpdatedAt(LocalDateTime.now());
+
+        Rental updatedRental = rentalService.updateRental(existingRental);
+
+        RentalResponse response = new RentalResponse(
+                updatedRental.getId(),
+                updatedRental.getName(),
+                updatedRental.getSurface(),
+                updatedRental.getPrice(),
+                updatedRental.getPicture(),
+                updatedRental.getDescription(),
+                updatedRental.getOwnerId(),
+                updatedRental.getCreatedAt() != null ? updatedRental.getCreatedAt().toString() : null,
+                updatedRental.getUpdatedAt() != null ? updatedRental.getUpdatedAt().toString() : null
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/images/{filename:.+}")
     public ResponseEntity<?> getImage(@PathVariable String filename) {
         try {
-            Path filePath = Paths.get("uploads").resolve(filename).normalize();
-            File imageFile = filePath.toFile();
-
-            if (!imageFile.exists()) {
+            Path filePath = uploadDir.resolve(filename).normalize();
+            if (!Files.exists(filePath)) {
                 return ResponseEntity.notFound().build();
             }
 
@@ -161,5 +193,4 @@ public class RentalController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unable to read image");
         }
     }
-
 }

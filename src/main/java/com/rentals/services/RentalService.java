@@ -28,4 +28,8 @@ public class RentalService {
         return rentalRepository.findById(id).orElse(null);
     }
 
+    public Rental createRental(Rental rental) {
+        logger.info("Saving new rental with name: {}", rental.getName());
+        return rentalRepository.save(rental);
+    }
 }

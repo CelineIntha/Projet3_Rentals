@@ -1,4 +1,4 @@
-package com.rentals.dto.rentals;
+package com.rentals.dto;
 
 import lombok.Getter;
 import lombok.Setter;

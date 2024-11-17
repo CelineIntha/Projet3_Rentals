@@ -51,13 +51,18 @@ public class LoginController {
             return ResponseEntity.ok(loginResponse);
 
         } catch (RuntimeException e) {
-            logger.error("Authentication failed: {}", e.getMessage());
-            return ResponseEntity.status(401).body(e.getMessage());
+            logger.error("Authentication failed");
+            return ResponseEntity.status(401).body("Authentication failed. Please check your credentials and try again.");
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+        if (userService.findByEmail(registerUserDto.getEmail()) != null) {
+            logger.error("Account already exists");
+            return ResponseEntity.status(400).body("An account with this email address already exists. Please log in or use a different email address to register.");
+        }
+
         try {
             User registeredUser = authenticationService.signup(registerUserDto);
 
@@ -66,10 +71,11 @@ public class LoginController {
             return ResponseEntity.ok(userResponse);
 
         } catch (RuntimeException e) {
-            logger.error("Registration failed: {}", e.getMessage());
-            return ResponseEntity.status(400).body(e.getMessage());
+            logger.error("Registration failed");
+            return ResponseEntity.status(400).body("Registration failed. Please verify the information and try again.");
         }
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<?> getAuthenticatedUser() {
@@ -83,7 +89,7 @@ public class LoginController {
         User user = userService.findByEmail(email);
 
         if (user == null) {
-            return ResponseEntity.status(404).body("Utilisateur non trouvé");
+            return ResponseEntity.status(401).body("Utilisateur non trouvé");
         }
 
         UserResponse userResponse = new UserResponse(user.getId(), user.getName(), user.getEmail());

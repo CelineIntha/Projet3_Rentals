@@ -92,17 +92,13 @@ public class LoginController {
     public ResponseEntity<?> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            logger.error("User is not authenticated");
-            return ResponseEntity.status(401).body("User not authenticated");
-        }
-
         String email = authentication.getName();
+
         User user = userService.findByEmail(email);
 
         if (user == null) {
             logger.error("User not found for email: {}", email);
-            return ResponseEntity.status(401).body("User not found");
+            return ResponseEntity.status(404).body("error:User not found");
         }
 
         String formattedCreatedAt = user.getCreatedAt().format(dateFormatter);

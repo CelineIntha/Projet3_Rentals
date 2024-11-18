@@ -39,6 +39,9 @@ public class SecurityConfiguration {
                         .anyRequest()
                         .authenticated()
                 )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(customAuthenticationEntryPoint())
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -48,9 +51,10 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-
-
-
+    @Bean
+    public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint();
+    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {

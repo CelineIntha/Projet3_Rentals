@@ -4,36 +4,28 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Setter
 @Getter
 @Entity
-@Table(name = "RENTALS")
-public class Rental {
+@Table(name = "MESSAGES")
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private BigDecimal surface;
-
-    @Column(nullable = false)
-    private BigDecimal price;
-
-    private String picture;
-
-    @Column(length = 2000)
-    private String description;
+    @ManyToOne
+    @JoinColumn(name = "rental_id", nullable = false)
+    private Rental rental;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(length = 2000)
+    private String message;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

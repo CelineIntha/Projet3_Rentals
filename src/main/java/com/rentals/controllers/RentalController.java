@@ -111,21 +111,21 @@ public class RentalController {
             rental.setCreatedAt(LocalDateTime.now());
             rental.setUpdatedAt(LocalDateTime.now());
 
-            Rental savedRental = rentalService.createRental(rental);
+            Rental newRental = rentalService.createRental(rental);
 
             RentalResponse response = new RentalResponse(
-                    savedRental.getId(),
-                    savedRental.getName(),
-                    savedRental.getSurface(),
-                    savedRental.getPrice(),
-                    savedRental.getPicture(),
-                    savedRental.getDescription(),
-                    savedRental.getOwnerId(),
-                    savedRental.getCreatedAt() != null ? savedRental.getCreatedAt().toString() : null,
-                    savedRental.getUpdatedAt() != null ? savedRental.getUpdatedAt().toString() : null
+                    newRental.getId(),
+                    newRental.getName(),
+                    newRental.getSurface(),
+                    newRental.getPrice(),
+                    newRental.getPicture(),
+                    newRental.getDescription(),
+                    newRental.getOwnerId(),
+                    newRental.getCreatedAt() != null ? newRental.getCreatedAt().toString() : null,
+                    newRental.getUpdatedAt() != null ? newRental.getUpdatedAt().toString() : null
             );
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
 
         } catch (IOException e) {
             logger.error("Error while uploading picture: {}", e.getMessage(), e);
@@ -144,18 +144,18 @@ public class RentalController {
             @RequestParam("price") BigDecimal price,
             @RequestParam("description") String description
     ) {
-        Rental existingRental = rentalService.findRentalById(id);
-        if (existingRental == null) {
+        Rental updateRental = rentalService.findRentalById(id);
+        if (updateRental == null) {
             return ResponseEntity.notFound().build();
         }
 
-        existingRental.setName(name);
-        existingRental.setSurface(surface);
-        existingRental.setPrice(price);
-        existingRental.setDescription(description);
-        existingRental.setUpdatedAt(LocalDateTime.now());
+        updateRental.setName(name);
+        updateRental.setSurface(surface);
+        updateRental.setPrice(price);
+        updateRental.setDescription(description);
+        updateRental.setUpdatedAt(LocalDateTime.now());
 
-        Rental updatedRental = rentalService.updateRental(existingRental);
+        Rental updatedRental = rentalService.updateRental(updateRental);
 
         RentalResponse response = new RentalResponse(
                 updatedRental.getId(),

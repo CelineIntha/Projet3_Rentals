@@ -20,10 +20,13 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, length = 255)
     private String email;
 
+    @Column(nullable = true, length = 255)
     private String name;
+
+    @Column(nullable = true, length = 255)
     private String password;
 
     @Column(name = "created_at")
@@ -31,7 +34,6 @@ public class User implements UserDetails {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -21,11 +21,14 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
+
 @RequestMapping("/api/auth")
 @RestController
 public class LoginController {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
@@ -66,7 +69,16 @@ public class LoginController {
         try {
             User registeredUser = authenticationService.signup(registerUserDto);
 
-            UserResponse userResponse = new UserResponse(registeredUser.getId(), registeredUser.getName(), registeredUser.getEmail());
+            String formattedCreatedAt = registeredUser.getCreatedAt().format(dateFormatter);
+            String formattedUpdatedAt = registeredUser.getUpdatedAt().format(dateFormatter);
+
+            UserResponse userResponse = new UserResponse(
+                    registeredUser.getId(),
+                    registeredUser.getName(),
+                    registeredUser.getEmail(),
+                    formattedCreatedAt,
+                    formattedUpdatedAt
+            );
 
             return ResponseEntity.ok(userResponse);
 
@@ -76,23 +88,29 @@ public class LoginController {
         }
     }
 
-
     @GetMapping("/me")
     public ResponseEntity<?> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return ResponseEntity.status(401).body("Utilisateur non authentifié");
-        }
-
         String email = authentication.getName();
+
         User user = userService.findByEmail(email);
 
         if (user == null) {
-            return ResponseEntity.status(401).body("Utilisateur non trouvé");
+            logger.error("User not found for email: {}", email);
+            return ResponseEntity.status(404).body("error:User not found");
         }
 
-        UserResponse userResponse = new UserResponse(user.getId(), user.getName(), user.getEmail());
+        String formattedCreatedAt = user.getCreatedAt().format(dateFormatter);
+        String formattedUpdatedAt = user.getUpdatedAt().format(dateFormatter);
+
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                formattedCreatedAt,
+                formattedUpdatedAt
+        );
 
         return ResponseEntity.ok(userResponse);
     }

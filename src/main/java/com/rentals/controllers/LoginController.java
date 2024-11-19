@@ -1,8 +1,8 @@
 package com.rentals.controllers;
 
 import com.rentals.model.User;
-import com.rentals.dto.LoginUserDto;
-import com.rentals.dto.RegisterUserDto;
+import com.rentals.dto.auth.LoginUserDto;
+import com.rentals.dto.auth.RegisterUserDto;
 import com.rentals.responses.LoginResponse;
 import com.rentals.responses.UserResponse;
 import com.rentals.services.AuthenticationService;

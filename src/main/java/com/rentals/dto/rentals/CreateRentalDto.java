@@ -1,4 +1,4 @@
-package com.rentals.dto;
+package com.rentals.dto.rentals;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

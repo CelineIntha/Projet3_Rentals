@@ -1,7 +1,7 @@
 package com.rentals.services;
 
-import com.rentals.dto.LoginUserDto;
-import com.rentals.dto.RegisterUserDto;
+import com.rentals.dto.auth.LoginUserDto;
+import com.rentals.dto.auth.RegisterUserDto;
 import com.rentals.model.User;
 import com.rentals.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;

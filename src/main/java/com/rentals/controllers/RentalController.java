@@ -45,7 +45,7 @@ public class RentalController {
                 rental.getPrice(),
                 rental.getPicture(),
                 rental.getDescription(),
-                rental.getOwnerId(),
+                rental.getOwner().getId(),
                 rental.getCreatedAt() != null ? rental.getCreatedAt().toString() : null,
                 rental.getUpdatedAt() != null ? rental.getUpdatedAt().toString() : null
         )).toList();
@@ -65,7 +65,7 @@ public class RentalController {
                 rental.getPrice(),
                 rental.getPicture(),
                 rental.getDescription(),
-                rental.getOwnerId(),
+                rental.getOwner().getId(),
                 rental.getCreatedAt() != null ? rental.getCreatedAt().toString() : null,
                 rental.getUpdatedAt() != null ? rental.getUpdatedAt().toString() : null
         );
@@ -99,7 +99,6 @@ public class RentalController {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User authenticatedUser = (User) authentication.getPrincipal();
-            Integer ownerId = authenticatedUser.getId();
 
             Rental rental = new Rental();
             rental.setName(name);
@@ -107,7 +106,7 @@ public class RentalController {
             rental.setPrice(price);
             rental.setPicture(pictureUrl);
             rental.setDescription(description);
-            rental.setOwnerId(ownerId);
+            rental.setOwner(authenticatedUser);
             rental.setCreatedAt(LocalDateTime.now());
             rental.setUpdatedAt(LocalDateTime.now());
 
@@ -120,7 +119,7 @@ public class RentalController {
                     newRental.getPrice(),
                     newRental.getPicture(),
                     newRental.getDescription(),
-                    newRental.getOwnerId(),
+                    newRental.getOwner().getId(),
                     newRental.getCreatedAt() != null ? newRental.getCreatedAt().toString() : null,
                     newRental.getUpdatedAt() != null ? newRental.getUpdatedAt().toString() : null
             );
@@ -164,33 +163,11 @@ public class RentalController {
                 updatedRental.getPrice(),
                 updatedRental.getPicture(),
                 updatedRental.getDescription(),
-                updatedRental.getOwnerId(),
+                updatedRental.getOwner().getId(),
                 updatedRental.getCreatedAt() != null ? updatedRental.getCreatedAt().toString() : null,
                 updatedRental.getUpdatedAt() != null ? updatedRental.getUpdatedAt().toString() : null
         );
 
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/images/{filename:.+}")
-    public ResponseEntity<?> getImage(@PathVariable String filename) {
-        try {
-            Path filePath = uploadDir.resolve(filename).normalize();
-            if (!Files.exists(filePath)) {
-                return ResponseEntity.notFound().build();
-            }
-
-            String mimeType = Files.probeContentType(filePath);
-            if (mimeType == null) {
-                mimeType = "application/octet-stream";
-            }
-
-            return ResponseEntity.ok()
-                    .header("Content-Type", mimeType)
-                    .body(Files.readAllBytes(filePath));
-        } catch (IOException e) {
-            logger.error("Error while reading image: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unable to read image");
-        }
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Setter
 @Getter
@@ -20,20 +21,32 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = true, length = 255)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(nullable = true, length = 255)
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = true, length = 255)
+    @Column(nullable = false, length = 255)
     private String password;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Rental> rentals;
+
+    @OneToMany(mappedBy = "user")
+    private List<Message> messages;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

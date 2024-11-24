@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CreateMessageDto {
-
     @NotNull(message = "L'ID de la location est obligatoire.")
     @JsonProperty("rental_id")
     private Integer rentalId;
@@ -21,5 +20,5 @@ public class CreateMessageDto {
     @NotNull(message = "Le message est obligatoire.")
     @Size(max = 2000, message = "Le message ne peut pas dépasser 2000 caractères.")
     private String message;
-
 }
+

@@ -1,4 +1,4 @@
-package com.rentals.dto;
+package com.rentals.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

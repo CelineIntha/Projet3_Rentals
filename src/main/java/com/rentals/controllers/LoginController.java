@@ -1,8 +1,8 @@
 package com.rentals.controllers;
 
 import com.rentals.model.User;
-import com.rentals.dto.LoginUserDto;
-import com.rentals.dto.RegisterUserDto;
+import com.rentals.dto.auth.LoginUserDto;
+import com.rentals.dto.auth.RegisterUserDto;
 import com.rentals.responses.LoginResponse;
 import com.rentals.responses.UserResponse;
 import com.rentals.services.AuthenticationService;
@@ -21,11 +21,14 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
+
 @RequestMapping("/api/auth")
 @RestController
 public class LoginController {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
@@ -52,6 +55,8 @@ public class LoginController {
 
         } catch (RuntimeException e) {
             logger.error("Authentication failed");
+            // TODO: centraliser les mêmes erreurs 401 et les centraliser.
+            // TODO: Un objet response ou je vais définir un champ plutôt qu'une chaine de caractère
             return ResponseEntity.status(401).body("Authentication failed. Please check your credentials and try again.");
         }
     }
@@ -66,7 +71,16 @@ public class LoginController {
         try {
             User registeredUser = authenticationService.signup(registerUserDto);
 
-            UserResponse userResponse = new UserResponse(registeredUser.getId(), registeredUser.getName(), registeredUser.getEmail());
+            String formattedCreatedAt = registeredUser.getCreatedAt().format(dateFormatter);
+            String formattedUpdatedAt = registeredUser.getUpdatedAt().format(dateFormatter);
+
+            UserResponse userResponse = new UserResponse(
+                    registeredUser.getId(),
+                    registeredUser.getName(),
+                    registeredUser.getEmail(),
+                    formattedCreatedAt,
+                    formattedUpdatedAt
+            );
 
             return ResponseEntity.ok(userResponse);
 
@@ -76,23 +90,29 @@ public class LoginController {
         }
     }
 
-
     @GetMapping("/me")
     public ResponseEntity<?> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return ResponseEntity.status(401).body("Utilisateur non authentifié");
-        }
-
         String email = authentication.getName();
+
         User user = userService.findByEmail(email);
 
         if (user == null) {
-            return ResponseEntity.status(401).body("Utilisateur non trouvé");
+            logger.error("User not found for email: {}", email);
+            return ResponseEntity.status(404).body("error:User not found");
         }
 
-        UserResponse userResponse = new UserResponse(user.getId(), user.getName(), user.getEmail());
+        String formattedCreatedAt = user.getCreatedAt().format(dateFormatter);
+        String formattedUpdatedAt = user.getUpdatedAt().format(dateFormatter);
+
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                formattedCreatedAt,
+                formattedUpdatedAt
+        );
 
         return ResponseEntity.ok(userResponse);
     }

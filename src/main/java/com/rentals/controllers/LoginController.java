@@ -55,6 +55,8 @@ public class LoginController {
 
         } catch (RuntimeException e) {
             logger.error("Authentication failed");
+            // TODO: centraliser les mêmes erreurs 401 et les centraliser.
+            // TODO: Un objet response ou je vais définir un champ plutôt qu'une chaine de caractère
             return ResponseEntity.status(401).body("Authentication failed. Please check your credentials and try again.");
         }
     }

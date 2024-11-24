@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String requestPath = request.getRequestURI();
 
         // J'ignore le filtrage pour les routes /register et /login
-        if (requestPath.startsWith("/api/auth/register") || requestPath.startsWith("/api/auth/login")) {
+        if (requestPath.startsWith("/api/auth/register") || requestPath.startsWith("/api/auth/login") || requestPath.startsWith("/api/rentals/images/")) {
             filterChain.doFilter(request, response);
             return;
         }

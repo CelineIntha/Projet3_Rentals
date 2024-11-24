@@ -14,19 +14,19 @@ public class RentalResponse {
     private BigDecimal price;
     private String picture;
     private String description;
-    private Integer ownerId;
-    private String createdAt;
-    private String updatedAt;
+    private Integer owner_id;
+    private String created_at;
+    private String updated_at;
 
-    public RentalResponse(Integer id, String name, BigDecimal surface, BigDecimal price, String picture, String description, Integer ownerId, String createdAt, String updatedAt) {
+    public RentalResponse(Integer id, String name, BigDecimal surface, BigDecimal price, String picture, String description, Integer owner_id, String created_at, String updated_at) {
         this.id = id;
         this.name = name;
         this.surface = surface;
         this.price = price;
         this.picture = picture;
         this.description = description;
-        this.ownerId = ownerId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.owner_id = owner_id;
+        this.created_at = created_at;
+        this.updated_at = updated_at;
     }
 }

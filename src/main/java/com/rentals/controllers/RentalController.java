@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +38,8 @@ public class RentalController {
 
     @Value("${base.url}")
     private String baseUrl;
+
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     public RentalController(RentalService rentalService) {
         this.rentalService = rentalService;
@@ -53,8 +56,8 @@ public class RentalController {
                 rental.getPicture(),
                 rental.getDescription(),
                 rental.getOwner().getId(),
-                rental.getCreatedAt() != null ? rental.getCreatedAt().toString() : null,
-                rental.getUpdatedAt() != null ? rental.getUpdatedAt().toString() : null
+                rental.getCreatedAt() != null ? rental.getCreatedAt().format(dateFormatter) : null,
+                rental.getUpdatedAt() != null ? rental.getUpdatedAt().format(dateFormatter) : null
         )).toList();
         return ResponseEntity.ok(Map.of("rentals", response));
     }
@@ -73,8 +76,8 @@ public class RentalController {
                 rental.getPicture(),
                 rental.getDescription(),
                 rental.getOwner().getId(),
-                rental.getCreatedAt() != null ? rental.getCreatedAt().toString() : null,
-                rental.getUpdatedAt() != null ? rental.getUpdatedAt().toString() : null
+                rental.getCreatedAt() != null ? rental.getCreatedAt().format(dateFormatter) : null,
+                rental.getUpdatedAt() != null ? rental.getUpdatedAt().format(dateFormatter) : null
         );
         return ResponseEntity.ok(response);
     }

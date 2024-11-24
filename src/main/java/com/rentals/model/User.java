@@ -1,5 +1,6 @@
 package com.rentals.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,10 +38,13 @@ public class User implements UserDetails {
     private List<Message> messages;
 
     @Column(name = "created_at")
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
+    @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
+
 
     @PrePersist
     public void prePersist() {

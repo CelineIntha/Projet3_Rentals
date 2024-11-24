@@ -38,7 +38,6 @@ public class MessageController {
 
     }
 
-
     @GetMapping("test")
     public ResponseEntity<String> testRoute() {
         return ResponseEntity.ok("La route fonctionne !");

@@ -89,7 +89,7 @@ You will then obtain the following response :
     "expiresIn": "token-expiration-time"
 }
 ```
-2. **If you don't have an account** : go to **localhost:3001/api/auth/register** and create an account.
+2. **If you don't have an account** : use the endpoint **localhost:3001/api/auth/register** and create an account.
 
 ```
 {

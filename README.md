@@ -40,14 +40,69 @@ To install and run the project, follow these steps:
 - **src/main/java:** Contains the Java source code.
 - **src/main/resources**: Contains configuration files like application.properties.
 
-
 ## Key Dependencies
 
-- **Spring Boot 3.3.5** : Main framework for application development. 
-- **Spring Security** : Provides endpoint security. 
-- **Spring Data JPA** : Enables database interaction using JPA. 
-- **MySQL Connector** : Handles connectivity to the MySQL database. 
+- **Spring Boot 3.3.5** : Main framework for application development.
+- **Spring Security** : Provides endpoint security.
+- **Spring Data JPA** : Enables database interaction using JPA.
+- **MySQL Connector** : Handles connectivity to the MySQL database.
 - **Lombok** : Reduces boilerplate code.
+
+## API Documentation
+
+This application uses Swagger (via Springdoc OpenAPI) to provide an interactive API documentation.
+
+# Accessing Swagger
+
+Once the application is running, you can access the Swagger UI at the following URL :
+
+```
+http://localhost:3001/swagger-ui.html
+```
+
+You will be able to :
+- View all available API endpoints.
+- Test API requests directly from the browser.
+- Access detailed descriptions of each endpoint's parameters and responses.
+
+# Swagger Authentication with JWT
+To access the secured endpoints, you need to provide a valid JWT token. 
+
+Follow these steps:
+
+With **Postman** or any other **API Platform** :
+1. **Obtain a JWT Token:** Use the authentication endpoint **`localhost:3001/api/auth/login`** to generate a JWT token by providing valid user credentials.
+
+Example request :
+```
+{
+  "email": "your-email",
+  "password": "your-password"
+}   
+
+```
+
+You will then obtain the following response : 
+```
+{
+    "token": "your-token",
+    "expiresIn": "token-expiration-time"
+}
+```
+2. **If you don't have an account** : go to **localhost:3001/api/auth/register** and create an account.
+
+```
+{
+    "email": "your-email",
+    "name": "your-name",
+    "password": "your-password"
+}   
+
+```
+
+3. **Add the Token in Swagger:** : In Swagger UI, click on the Authorize button (located at the top-right corner).
+
+4. After authorization, you can test the secured endpoints directly from the Swagger interface.
 
 ## **Contributing**
 

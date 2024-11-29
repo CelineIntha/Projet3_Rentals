@@ -4,6 +4,11 @@ import com.rentals.model.Rental;
 import com.rentals.model.User;
 import com.rentals.responses.RentalResponse;
 import com.rentals.services.RentalService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -30,6 +35,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/rentals")
+@Tag(name = "Rentals management", description = "Endpoints for managing rentals")
 public class RentalController {
 
     private static final Logger logger = LoggerFactory.getLogger(RentalController.class);
@@ -45,6 +51,11 @@ public class RentalController {
         this.rentalService = rentalService;
     }
 
+    @Operation(summary = "Get all rentals", description = "Retrieve a list of all rentals with details.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of rentals retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
     @GetMapping
     public ResponseEntity<Map<String, List<RentalResponse>>> getAllRentals() {
         List<Rental> rentals = rentalService.findAllRentals();
@@ -62,6 +73,11 @@ public class RentalController {
         return ResponseEntity.ok(Map.of("rentals", response));
     }
 
+    @Operation(summary = "Get rental by ID", description = "Retrieve a rental by its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rental retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Rental not found", content = @Content)
+    })
     @GetMapping("/{id}")
     public ResponseEntity<RentalResponse> getRentalById(@PathVariable Integer id) {
         Rental rental = rentalService.findRentalById(id);
@@ -82,6 +98,12 @@ public class RentalController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Retrieve an image", description = "Fetch an image by its filename.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Image not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
     @GetMapping("/images/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
@@ -101,6 +123,11 @@ public class RentalController {
         }
     }
 
+    @Operation(summary = "Create a new rental", description = "Add a new rental to the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rental created successfully"),
+            @ApiResponse(responseCode = "500", description = "Error while creating rental", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<String> createRental(
             @RequestParam("name") String name,
@@ -148,6 +175,11 @@ public class RentalController {
         }
     }
 
+    @Operation(summary = "Update a rental", description = "Update the details of an existing rental by his id.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rental updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Rental not found", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<String> updateRental(
             @PathVariable Integer id,

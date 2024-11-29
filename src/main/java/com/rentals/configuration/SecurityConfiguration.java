@@ -34,14 +34,14 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/rentals/images/**")
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/rentals/images/**", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(customAuthenticationEntryPoint())
-                )
+//                .exceptionHandling(exceptionHandling -> exceptionHandling
+//                        .authenticationEntryPoint(customAuthenticationEntryPoint())
+//                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -51,18 +51,19 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    @Bean
-    public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
-        return new CustomAuthenticationEntryPoint();
-    }
+//    @Bean
+//    public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
+//        return new CustomAuthenticationEntryPoint();
+//    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3001", "http://localhost:4200"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3001"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setExposedHeaders(List.of("Content-Disposition"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

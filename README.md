@@ -1,6 +1,8 @@
 ![Java](https://img.shields.io/badge/java-17-blue)
 ![Spring Boot](https://img.shields.io/badge/spring--boot-3.3.5-brightgreen)
 ![Maven](https://img.shields.io/badge/maven-3.2.5-orange)
+![Swagger](https://img.shields.io/badge/swagger--springdoc-2.6.0-blue)
+
 
 
 # ChâTop - Projet 3

@@ -57,7 +57,7 @@ This application uses Swagger (via Springdoc OpenAPI) to provide an interactive 
 Once the application is running, you can access the Swagger UI at the following URL :
 
 ```
-http://localhost:3001/swagger-ui.html
+http://localhost:3001/swagger-ui/index.html
 ```
 
 You will be able to :
@@ -70,7 +70,6 @@ To access the secured endpoints, you need to provide a valid JWT token.
 
 Follow these steps:
 
-With **Postman** or any other **API Platform** :
 1. **Obtain a JWT Token:** Use the authentication endpoint **`localhost:3001/api/auth/login`** to generate a JWT token by providing valid user credentials.
 
 Example request :

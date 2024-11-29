@@ -8,6 +8,13 @@ import com.rentals.responses.UserResponse;
 import com.rentals.services.AuthenticationService;
 import com.rentals.services.JwtService;
 import com.rentals.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 
 @RequestMapping("/api/auth")
 @RestController
+@Tag(name = "Authentication", description = "Endpoints for user authentication and account management")
 public class LoginController {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
@@ -41,6 +48,22 @@ public class LoginController {
     }
 
     @PostMapping("/login")
+    @Operation(
+            summary = "Authenticate user",
+            description = "Authenticate the user by email and password and return a JWT token."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Authentication successful",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication failed",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     public ResponseEntity<?> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
         try {
             User authenticatedUser = authenticationService.authenticate(loginUserDto);
@@ -55,13 +78,27 @@ public class LoginController {
 
         } catch (RuntimeException e) {
             logger.error("Authentication failed");
-            // TODO: centraliser les mêmes erreurs 401 et les centraliser.
-            // TODO: Un objet response ou je vais définir un champ plutôt qu'une chaine de caractère
             return ResponseEntity.status(401).body("Authentication failed. Please check your credentials and try again.");
         }
     }
 
     @PostMapping("/register")
+    @Operation(
+            summary = "Register new user",
+            description = "Create a new account for the user with the provided information."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User registered successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Registration failed due to invalid data or existing account",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
         if (userService.findByEmail(registerUserDto.getEmail()) != null) {
             logger.error("Account already exists");
@@ -91,6 +128,22 @@ public class LoginController {
     }
 
     @GetMapping("/me")
+    @Operation(
+            summary = "Get authenticated user",
+            description = "Retrieve the currently authenticated user's details."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Authenticated user retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     public ResponseEntity<?> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

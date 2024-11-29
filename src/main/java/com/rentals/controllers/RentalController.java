@@ -104,6 +104,7 @@ public class RentalController {
             @ApiResponse(responseCode = "404", description = "Image not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
+
     @GetMapping("/images/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
@@ -130,6 +131,8 @@ public class RentalController {
     })
     @PostMapping
     public ResponseEntity<String> createRental(
+            // il vaut mieux créer un objet quand on atteint plus de 4-5 paramètres.
+            // Ce sera un objet qui map chaque paramètres de l'objet dans le RequestParam
             @RequestParam("name") String name,
             @RequestParam("surface") BigDecimal surface,
             @RequestParam("price") BigDecimal price,
@@ -182,6 +185,7 @@ public class RentalController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<String> updateRental(
+            // Créer également un objet ici.
             @PathVariable Integer id,
             @RequestParam("name") String name,
             @RequestParam("surface") BigDecimal surface,

@@ -2,6 +2,8 @@ package com.rentals.services;
 
 import com.rentals.dto.auth.LoginUserDto;
 import com.rentals.dto.auth.RegisterUserDto;
+import com.rentals.exceptions.NotFoundException;
+import com.rentals.exceptions.UnauthorizedException;
 import com.rentals.model.User;
 import com.rentals.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,10 +51,10 @@ public class AuthenticationService {
                     )
             );
         } catch (AuthenticationException e) {
-            throw new RuntimeException("Email ou mot de passe invalide", e);
+            throw new UnauthorizedException("Incorrect credentials.");
         }
 
         return userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé après authentification"));
+                .orElseThrow(() -> new NotFoundException("User not found after authentication."));
     }
 }

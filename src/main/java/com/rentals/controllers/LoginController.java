@@ -1,8 +1,11 @@
 package com.rentals.controllers;
 
+import com.rentals.exceptions.UnauthorizedException;
+import com.rentals.exceptions.NotFoundException;
 import com.rentals.model.User;
 import com.rentals.dto.auth.LoginUserDto;
 import com.rentals.dto.auth.RegisterUserDto;
+import com.rentals.responses.ErrorResponse;
 import com.rentals.responses.LoginResponse;
 import com.rentals.responses.UserResponse;
 import com.rentals.services.AuthenticationService;
@@ -15,6 +18,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,9 +28,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.format.DateTimeFormatter;
 
@@ -61,25 +63,27 @@ public class LoginController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Authentication failed",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    public ResponseEntity<?> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
-        try {
-            User authenticatedUser = authenticationService.authenticate(loginUserDto);
+    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
+        logger.info("Attempting to authenticate user: {}", loginUserDto.getEmail());
 
-            String jwtToken = jwtService.generateToken(authenticatedUser);
+        User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
-            LoginResponse loginResponse = new LoginResponse()
-                    .setToken(jwtToken)
-                    .setExpiresIn(jwtService.getExpirationTime());
-
-            return ResponseEntity.ok(loginResponse);
-
-        } catch (RuntimeException e) {
-            logger.error("Authentication failed");
-            return ResponseEntity.status(401).body("Authentication failed. Please check your credentials and try again.");
+        if (authenticatedUser == null) {
+            logger.warn("Authentication failed for user: {}", loginUserDto.getEmail());
+            throw new UnauthorizedException("Invalid email or password.");
         }
+
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+
+        LoginResponse loginResponse = new LoginResponse()
+                .setToken(jwtToken)
+                .setExpiresIn(jwtService.getExpirationTime());
+
+        logger.info("Authentication successful for user: {}", loginUserDto.getEmail());
+        return ResponseEntity.ok(loginResponse);
     }
 
     @PostMapping("/register")
@@ -96,64 +100,51 @@ public class LoginController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Registration failed due to invalid data or existing account",
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+        logger.info("Attempting to register user with email: {}", registerUserDto.getEmail());
+
         if (userService.findByEmail(registerUserDto.getEmail()) != null) {
-            logger.error("Account already exists");
-            return ResponseEntity.status(400).body("An account with this email address already exists. Please log in or use a different email address to register.");
+            logger.warn("Registration failed: email already exists: {}", registerUserDto.getEmail());
+            throw new IllegalArgumentException("An account with this email address already exists. Please log in or use a different email address to register.");
         }
 
-        try {
-            User registeredUser = authenticationService.signup(registerUserDto);
+        User registeredUser = authenticationService.signup(registerUserDto);
 
-            String formattedCreatedAt = registeredUser.getCreatedAt().format(dateFormatter);
-            String formattedUpdatedAt = registeredUser.getUpdatedAt().format(dateFormatter);
+        String formattedCreatedAt = registeredUser.getCreatedAt().format(dateFormatter);
+        String formattedUpdatedAt = registeredUser.getUpdatedAt().format(dateFormatter);
 
-            UserResponse userResponse = new UserResponse(
-                    registeredUser.getId(),
-                    registeredUser.getName(),
-                    registeredUser.getEmail(),
-                    formattedCreatedAt,
-                    formattedUpdatedAt
-            );
+        UserResponse userResponse = new UserResponse(
+                registeredUser.getId(),
+                registeredUser.getName(),
+                registeredUser.getEmail(),
+                formattedCreatedAt,
+                formattedUpdatedAt
+        );
 
-            return ResponseEntity.ok(userResponse);
-
-        } catch (RuntimeException e) {
-            logger.error("Registration failed");
-            return ResponseEntity.status(400).body("Registration failed. Please verify the information and try again.");
-        }
+        logger.info("User registered successfully with email: {}", registerUserDto.getEmail());
+        return ResponseEntity.ok(userResponse);
     }
 
     @GetMapping("/me")
-    @Operation(
-            summary = "Get authenticated user",
-            description = "Retrieve the currently authenticated user's details."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Authenticated user retrieved successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "User not found",
-                    content = @Content(mediaType = "application/json")
-            )
-    })
-    public ResponseEntity<?> getAuthenticatedUser() {
+    public ResponseEntity<UserResponse> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        if (authentication == null || !authentication.isAuthenticated()) {
+            logger.error("User is not authenticated.");
+            throw new UnauthorizedException("User is not authenticated.");
+        }
+
         String email = authentication.getName();
+        logger.info("Fetching authenticated user details for email: {}", email);
 
         User user = userService.findByEmail(email);
 
         if (user == null) {
             logger.error("User not found for email: {}", email);
-            return ResponseEntity.status(404).body("error:User not found");
+            throw new NotFoundException("User not found for email: " + email);
         }
 
         String formattedCreatedAt = user.getCreatedAt().format(dateFormatter);
@@ -167,6 +158,8 @@ public class LoginController {
                 formattedUpdatedAt
         );
 
+        logger.info("Authenticated user details fetched successfully for email: {}", email);
         return ResponseEntity.ok(userResponse);
     }
+
 }

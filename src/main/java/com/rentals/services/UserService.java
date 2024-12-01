@@ -1,5 +1,6 @@
 package com.rentals.services;
 
+import com.rentals.exceptions.NotFoundException;
 import com.rentals.model.User;
 import com.rentals.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,6 @@ public class UserService {
 
     public User getUserById(Integer id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec l'ID : " + id));
+                .orElseThrow(() -> new NotFoundException("Utilisateur non trouvé avec l'ID : " + id));
     }
 }

@@ -43,9 +43,7 @@ public class MessageController {
         try {
             MessageResponse response = messageService.createMessage(createMessageDto);
             return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException ex) {
-            throw ex;
-        } catch (UnauthorizedException ex) {
+        } catch (IllegalArgumentException | UnauthorizedException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new IllegalArgumentException("An unexpected error occurred while processing the message.");

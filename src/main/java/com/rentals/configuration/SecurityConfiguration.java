@@ -20,7 +20,7 @@ import java.util.List;
 public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-//    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -29,7 +29,7 @@ public class SecurityConfiguration {
     ) {
         this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-//        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     @Bean
@@ -37,14 +37,14 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/rentals/images/**", "/swagger-ui/**", "/v3/api-docs/**")
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/me", "/api/rentals/images/**", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
-//                .exceptionHandling(exceptionHandling -> exceptionHandling
-//                        .authenticationEntryPoint(authenticationEntryPoint)
-//                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -57,7 +57,7 @@ public class SecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3001"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3001", "http://localhost:4200"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));

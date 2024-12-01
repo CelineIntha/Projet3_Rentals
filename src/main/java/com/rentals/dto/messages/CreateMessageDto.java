@@ -9,16 +9,15 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CreateMessageDto {
-    @NotNull(message = "L'ID de la location est obligatoire.")
+    @NotNull(message = "The rental ID is required.")
     @JsonProperty("rental_id")
     private Integer rentalId;
 
-    @NotNull(message = "L'ID de l'utilisateur est obligatoire.")
+    @NotNull(message = "The user ID is required.")
     @JsonProperty("user_id")
     private Integer userId;
 
-    @NotNull(message = "Le message est obligatoire.")
-    @Size(max = 2000, message = "Le message ne peut pas dépasser 2000 caractères.")
+    @NotNull(message = "The message is required.")
+    @Size(max = 2000, message = "The message cannot exceed 2000 characters.")
     private String message;
 }
-

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -103,30 +104,45 @@ public class LoginController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
         logger.info("Attempting to register user with email: {}", registerUserDto.getEmail());
 
         if (userService.findByEmail(registerUserDto.getEmail()) != null) {
             logger.warn("Registration failed: email already exists: {}", registerUserDto.getEmail());
-            throw new IllegalArgumentException("An account with this email address already exists. Please log in or use a different email address to register.");
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "An account with this email address already exists."
+            ));
         }
 
-        User registeredUser = authenticationService.signup(registerUserDto);
+        try {
+            User registeredUser = authenticationService.signup(registerUserDto);
 
-        String formattedCreatedAt = registeredUser.getCreatedAt().format(dateFormatter);
-        String formattedUpdatedAt = registeredUser.getUpdatedAt().format(dateFormatter);
+            String jwtToken = jwtService.generateToken(registeredUser);
 
-        UserResponse userResponse = new UserResponse(
-                registeredUser.getId(),
-                registeredUser.getName(),
-                registeredUser.getEmail(),
-                formattedCreatedAt,
-                formattedUpdatedAt
-        );
+            UserResponse userResponse = new UserResponse(
+                    registeredUser.getId(),
+                    registeredUser.getName(),
+                    registeredUser.getEmail(),
+                    registeredUser.getCreatedAt().format(dateFormatter),
+                    registeredUser.getUpdatedAt().format(dateFormatter)
+            );
 
-        logger.info("User registered successfully with email: {}", registerUserDto.getEmail());
-        return ResponseEntity.ok(userResponse);
+            logger.info("User registered successfully with email: {}", registerUserDto.getEmail());
+
+            return ResponseEntity.ok(Map.of(
+                    "user", userResponse,
+                    "token", jwtToken,
+                    "expiresIn", jwtService.getExpirationTime()
+            ));
+
+        } catch (Exception e) {
+            logger.error("Registration failed for email: {}", registerUserDto.getEmail(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                    "message", "An unexpected error occurred during registration."
+            ));
+        }
     }
+
 
     @GetMapping("/me")
     @Operation(

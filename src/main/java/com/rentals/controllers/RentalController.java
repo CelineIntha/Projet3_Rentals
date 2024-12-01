@@ -1,6 +1,8 @@
 package com.rentals.controllers;
 
 import com.rentals.dto.rentals.RentalDto;
+import com.rentals.exceptions.NotFoundException;
+import com.rentals.exceptions.UnauthorizedException;
 import com.rentals.model.Rental;
 import com.rentals.model.User;
 import com.rentals.responses.RentalResponse;
@@ -81,7 +83,7 @@ public class RentalController {
     public ResponseEntity<RentalResponse> getRentalById(@PathVariable Integer id) {
         Rental rental = rentalService.findRentalById(id);
         if (rental == null) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Rental with ID " + id + " not found");
         }
         RentalResponse response = new RentalResponse(
                 rental.getId(),
@@ -97,6 +99,7 @@ public class RentalController {
         return ResponseEntity.ok(response);
     }
 
+
     @Operation(summary = "Retrieve an image", description = "Fetch an image by its filename.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Image retrieved successfully"),
@@ -110,18 +113,19 @@ public class RentalController {
             Path filePath = uploadDir.resolve(filename).normalize();
             Resource resource = new UrlResource(filePath.toUri());
 
-            if (resource.exists() && resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new NotFoundException("Image " + filename + " not found");
             }
-        } catch (Exception e) {
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } catch (IOException e) {
             logger.error("Error fetching image: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new RuntimeException("Internal error while fetching image");
         }
     }
+
 
     @Operation(summary = "Create a new rental", description = "Add a new rental to the database.")
     @ApiResponses(value = {
@@ -129,7 +133,7 @@ public class RentalController {
             @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication token was either missing, invalid or expired.", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<String> createRental(@ModelAttribute RentalDto rentalDTO) {
+    public ResponseEntity<Map<String, String>> createRental(@ModelAttribute RentalDto rentalDTO) {
         try {
             String pictureUrl = null;
 
@@ -144,7 +148,9 @@ public class RentalController {
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User authenticatedUser = (User) authentication.getPrincipal();
+            if (authentication == null || !(authentication.getPrincipal() instanceof User authenticatedUser)) {
+                throw new UnauthorizedException("User not authenticated");
+            }
 
             Rental rental = new Rental();
             rental.setName(rentalDTO.getName());
@@ -158,14 +164,12 @@ public class RentalController {
 
             rentalService.createRental(rental);
 
-            return ResponseEntity.status(HttpStatus.OK).body("Rental created");
+            Map<String, String> response = Map.of("message", "Rental created successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (IOException e) {
             logger.error("Error while uploading picture: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while uploading picture");
-        } catch (Exception e) {
-            logger.error("Error while creating rental: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating rental");
+            throw new RuntimeException("Error while uploading picture");
         }
     }
 
@@ -176,23 +180,22 @@ public class RentalController {
             @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication token was either missing, invalid or expired.", content = @Content)
     })
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateRental(
+    public ResponseEntity<Map<String, String>> updateRental(
             @PathVariable Integer id,
             @ModelAttribute RentalDto rentalDTO) {
-        Rental updateRental = rentalService.findRentalById(id);
-        if (updateRental == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rental not found");
-        }
+        try {
+            Rental updateRental = rentalService.findRentalById(id);
+            if (updateRental == null) {
+                throw new NotFoundException("Rental with ID " + id + " not found");
+            }
 
-        updateRental.setName(rentalDTO.getName());
-        updateRental.setSurface(rentalDTO.getSurface());
-        updateRental.setPrice(rentalDTO.getPrice());
-        updateRental.setDescription(rentalDTO.getDescription());
-        updateRental.setUpdatedAt(LocalDateTime.now());
+            updateRental.setName(rentalDTO.getName());
+            updateRental.setSurface(rentalDTO.getSurface());
+            updateRental.setPrice(rentalDTO.getPrice());
+            updateRental.setDescription(rentalDTO.getDescription());
+            updateRental.setUpdatedAt(LocalDateTime.now());
 
-        if (rentalDTO.getPicture() != null && !rentalDTO.getPicture().isEmpty()) {
-            try {
-                Path uploadDir = Paths.get("uploads");
+            if (rentalDTO.getPicture() != null && !rentalDTO.getPicture().isEmpty()) {
                 if (Files.notExists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
@@ -201,15 +204,17 @@ public class RentalController {
 
                 String pictureUrl = baseUrl + "/api/rentals/images/" + rentalDTO.getPicture().getOriginalFilename();
                 updateRental.setPicture(pictureUrl);
-            } catch (IOException e) {
-                logger.error("Error while uploading picture: {}", e.getMessage(), e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while uploading picture");
             }
+
+            rentalService.updateRental(updateRental);
+
+            Map<String, String> response = Map.of("message", "Rental updated successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
+        } catch (IOException e) {
+            logger.error("Error while uploading picture: {}", e.getMessage(), e);
+            throw new RuntimeException("Error while uploading picture");
         }
-
-        rentalService.updateRental(updateRental);
-
-        return ResponseEntity.status(HttpStatus.OK).body("Rental updated!");
     }
 
 }

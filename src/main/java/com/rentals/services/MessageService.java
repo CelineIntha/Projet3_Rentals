@@ -7,7 +7,6 @@ import com.rentals.model.Rental;
 import com.rentals.model.User;
 import com.rentals.repository.MessageRepository;
 import com.rentals.repository.RentalRepository;
-import com.rentals.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,12 +16,10 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final RentalRepository rentalRepository;
-    private final UserRepository userRepository;
 
-    public MessageService(MessageRepository messageRepository, RentalRepository rentalRepository, UserRepository userRepository) {
+    public MessageService(MessageRepository messageRepository, RentalRepository rentalRepository) {
         this.messageRepository = messageRepository;
         this.rentalRepository = rentalRepository;
-        this.userRepository = userRepository;
     }
 
     public MessageResponse createMessage(CreateMessageDto createMessageDto) {
@@ -36,9 +33,6 @@ public class MessageService {
         Rental rental = rentalRepository.findById(createMessageDto.getRentalId())
                 .orElseThrow(() -> new IllegalArgumentException("Rental not found with id: " + createMessageDto.getRentalId()));
 
-        if (!rental.getOwner().getId().equals(authenticatedUser.getId())) {
-            throw new SecurityException("You do not have permission to send a message for this rental.");
-        }
 
         Message message = new Message();
         message.setRental(rental);

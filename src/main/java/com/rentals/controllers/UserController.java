@@ -35,8 +35,8 @@ public class UserController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid user ID provided",
+                    responseCode = "401",
+                    description = "Unauthorized: Authentication token was either missing, invalid or expired.",
                     content = @Content(mediaType = "application/json")
             ),
             @ApiResponse(

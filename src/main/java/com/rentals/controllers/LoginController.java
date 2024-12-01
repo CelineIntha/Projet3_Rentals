@@ -129,6 +129,22 @@ public class LoginController {
     }
 
     @GetMapping("/me")
+    @Operation(
+            summary = "Get your user information.",
+            description = "Get your user information."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User registered successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized: Authentication token was either missing, invalid or expired.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     public ResponseEntity<UserResponse> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

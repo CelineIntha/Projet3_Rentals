@@ -35,7 +35,7 @@ public class MessageController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input data",
                     content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500", description = "An unexpected error occurred",
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication token was either missing, invalid or expired.",
                     content = @Content(mediaType = "application/json"))
     })
     @PostMapping
@@ -46,8 +46,6 @@ public class MessageController {
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred.", ex);
         }
     }
 }

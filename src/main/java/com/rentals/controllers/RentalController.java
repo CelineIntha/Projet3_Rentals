@@ -1,5 +1,6 @@
 package com.rentals.controllers;
 
+import com.rentals.dto.rentals.RentalDto;
 import com.rentals.model.Rental;
 import com.rentals.model.User;
 import com.rentals.responses.RentalResponse;
@@ -18,12 +19,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +53,7 @@ public class RentalController {
     @Operation(summary = "Get all rentals", description = "Retrieve a list of all rentals with details.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of rentals retrieved successfully"),
-            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication token was either missing, invalid or expired.", content = @Content)
     })
     @GetMapping
     public ResponseEntity<Map<String, List<RentalResponse>>> getAllRentals() {
@@ -76,7 +75,7 @@ public class RentalController {
     @Operation(summary = "Get rental by ID", description = "Retrieve a rental by its unique ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rental retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Rental not found", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication token was either missing, invalid or expired.", content = @Content)
     })
     @GetMapping("/{id}")
     public ResponseEntity<RentalResponse> getRentalById(@PathVariable Integer id) {
@@ -127,40 +126,32 @@ public class RentalController {
     @Operation(summary = "Create a new rental", description = "Add a new rental to the database.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rental created successfully"),
-            @ApiResponse(responseCode = "500", description = "Error while creating rental", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication token was either missing, invalid or expired.", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<String> createRental(
-            // il vaut mieux créer un objet quand on atteint plus de 4-5 paramètres.
-            // Ce sera un objet qui map chaque paramètres de l'objet dans le RequestParam
-            @RequestParam("name") String name,
-            @RequestParam("surface") BigDecimal surface,
-            @RequestParam("price") BigDecimal price,
-            @RequestParam(value = "picture", required = false) MultipartFile picture,
-            @RequestParam("description") String description
-    ) {
+    public ResponseEntity<String> createRental(@ModelAttribute RentalDto rentalDTO) {
         try {
             String pictureUrl = null;
 
-            if (picture != null && !picture.isEmpty()) {
+            if (rentalDTO.getPicture() != null && !rentalDTO.getPicture().isEmpty()) {
                 if (Files.notExists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
-                Path imagePath = uploadDir.resolve(Objects.requireNonNull(picture.getOriginalFilename()));
-                Files.copy(picture.getInputStream(), imagePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                Path imagePath = uploadDir.resolve(Objects.requireNonNull(rentalDTO.getPicture().getOriginalFilename()));
+                Files.copy(rentalDTO.getPicture().getInputStream(), imagePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-                pictureUrl = baseUrl + "/api/rentals/images/" + picture.getOriginalFilename();
+                pictureUrl = baseUrl + "/api/rentals/images/" + rentalDTO.getPicture().getOriginalFilename();
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User authenticatedUser = (User) authentication.getPrincipal();
 
             Rental rental = new Rental();
-            rental.setName(name);
-            rental.setSurface(surface);
-            rental.setPrice(price);
+            rental.setName(rentalDTO.getName());
+            rental.setSurface(rentalDTO.getSurface());
+            rental.setPrice(rentalDTO.getPrice());
             rental.setPicture(pictureUrl);
-            rental.setDescription(description);
+            rental.setDescription(rentalDTO.getDescription());
             rental.setOwner(authenticatedUser);
             rental.setCreatedAt(LocalDateTime.now());
             rental.setUpdatedAt(LocalDateTime.now());
@@ -178,33 +169,47 @@ public class RentalController {
         }
     }
 
+
     @Operation(summary = "Update a rental", description = "Update the details of an existing rental by his id.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Rental updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Rental not found", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication token was either missing, invalid or expired.", content = @Content)
     })
     @PutMapping("/{id}")
     public ResponseEntity<String> updateRental(
-            // Créer également un objet ici.
             @PathVariable Integer id,
-            @RequestParam("name") String name,
-            @RequestParam("surface") BigDecimal surface,
-            @RequestParam("price") BigDecimal price,
-            @RequestParam("description") String description
-    ) {
+            @ModelAttribute RentalDto rentalDTO) {
         Rental updateRental = rentalService.findRentalById(id);
         if (updateRental == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rental not found");
         }
 
-        updateRental.setName(name);
-        updateRental.setSurface(surface);
-        updateRental.setPrice(price);
-        updateRental.setDescription(description);
+        updateRental.setName(rentalDTO.getName());
+        updateRental.setSurface(rentalDTO.getSurface());
+        updateRental.setPrice(rentalDTO.getPrice());
+        updateRental.setDescription(rentalDTO.getDescription());
         updateRental.setUpdatedAt(LocalDateTime.now());
+
+        if (rentalDTO.getPicture() != null && !rentalDTO.getPicture().isEmpty()) {
+            try {
+                Path uploadDir = Paths.get("uploads");
+                if (Files.notExists(uploadDir)) {
+                    Files.createDirectories(uploadDir);
+                }
+                Path imagePath = uploadDir.resolve(Objects.requireNonNull(rentalDTO.getPicture().getOriginalFilename()));
+                Files.copy(rentalDTO.getPicture().getInputStream(), imagePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                String pictureUrl = baseUrl + "/api/rentals/images/" + rentalDTO.getPicture().getOriginalFilename();
+                updateRental.setPicture(pictureUrl);
+            } catch (IOException e) {
+                logger.error("Error while uploading picture: {}", e.getMessage(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while uploading picture");
+            }
+        }
 
         rentalService.updateRental(updateRental);
 
         return ResponseEntity.status(HttpStatus.OK).body("Rental updated!");
     }
+
 }

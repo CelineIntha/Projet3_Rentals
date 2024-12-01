@@ -3,6 +3,7 @@ package com.rentals.controllers;
 import com.rentals.dto.messages.CreateMessageDto;
 import com.rentals.responses.MessageResponse;
 import com.rentals.services.MessageService;
+import com.rentals.exceptions.UnauthorizedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -10,10 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -45,7 +44,11 @@ public class MessageController {
             MessageResponse response = messageService.createMessage(createMessageDto);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+            throw ex;
+        } catch (UnauthorizedException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("An unexpected error occurred while processing the message.");
         }
     }
 }

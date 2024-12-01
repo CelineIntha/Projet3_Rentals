@@ -20,7 +20,7 @@ import java.util.List;
 public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+//    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -29,7 +29,7 @@ public class SecurityConfiguration {
     ) {
         this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.authenticationEntryPoint = authenticationEntryPoint;
+//        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     @Bean
@@ -42,9 +42,9 @@ public class SecurityConfiguration {
                         .anyRequest()
                         .authenticated()
                 )
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(authenticationEntryPoint)
-                )
+//                .exceptionHandling(exceptionHandling -> exceptionHandling
+//                        .authenticationEntryPoint(authenticationEntryPoint)
+//                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

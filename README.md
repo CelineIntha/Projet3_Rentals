@@ -99,7 +99,7 @@ Follow these steps:
 Example request :
 ```
 {
-  "email": "your-email",
+  "email": "your@email.com",
   "password": "your-password"
 }   
 
@@ -116,7 +116,7 @@ You will then obtain the following response :
 
 ```
 {
-    "email": "your-email",
+    "email": "your@email.com",
     "name": "your-name",
     "password": "your-password"
 }   

@@ -6,15 +6,9 @@
 
 
 # ChâTop - Projet 3
-Rentals is an application developed with Spring Boot to manage your rental needs. This project is designed to be simple, efficient, and easy to use.
+Rentals is an application developed with Spring Boot to manage your rental needs.
 
-## Project Overview
 
-- Data management with **Spring Data JPA**.
-- Endpoint security using **Spring Security**.
-- Data validation with **Spring Boot Starter Validation**.
-- Support for relational databases like **MySQL**.
-- Dependency and build management with **Maven**.
 
 ## Prerequisites
 To run this project, ensure you have the following installed on your machine:
@@ -28,10 +22,11 @@ To run this project, ensure you have the following installed on your machine:
 To install and run the project, follow these steps:
 
 1. Clone this repository to your local machine.
-2. Configure your MySQL database and update the application.properties or application.yml file with the following details:
+2. Configure your MySQL database and update the application.properties with the following details:
    - Database URL
    - Username
    - Password
+   - JWT Secret key
 3. Install the project dependencies by running the following command:
 `   mvn clean install`
 4. Start the application by running:
@@ -40,15 +35,14 @@ To install and run the project, follow these steps:
 ## **Project Structure**
 
 - **src/main/java:** Contains the Java source code.
-- **src/main/resources**: Contains configuration files like application.properties.
+- **src/main/resources**: Contains configuration files (application.properties). Please, create your **.env** file here.
 
 ## Key Dependencies
 
 - **Spring Boot 3.3.5** : Main framework for application development.
 - **Spring Security** : Provides endpoint security.
 - **Spring Data JPA** : Enables database interaction using JPA.
-- **MySQL Connector** : Handles connectivity to the MySQL database.
-- **Lombok** : Reduces boilerplate code.
+- **MySQL Connector** : Handles connexion to the MySQL database.
 
 ## API Documentation
 
@@ -72,7 +66,7 @@ To access the secured endpoints, you need to provide a valid JWT token.
 
 Follow these steps:
 
-1. **Obtain a JWT Token:** Use the authentication endpoint **`localhost:3001/api/auth/login`** to generate a JWT token by providing valid user credentials.
+1. **Obtain a JWT Token:** Use the authentication endpoint **`localhost:3001/api/auth/login`** (in the "**Authentication**" section in Swagger) to generate a JWT token by providing valid user credentials.
 
 Example request :
 ```

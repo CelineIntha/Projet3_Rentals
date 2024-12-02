@@ -17,20 +17,47 @@ To run this project, ensure you have the following installed on your machine:
 - **Maven 3.2.5** or later.
 - **MySQL** or another compatible relational database.
 
+
 ## **Installation**
+
 
 To install and run the project, follow these steps:
 
 1. Clone this repository to your local machine.
-2. Configure your MySQL database and update the application.properties with the following details:
-   - Database URL
-   - Username
-   - Password
-   - JWT Secret key
-3. Install the project dependencies by running the following command:
+2. You can use a local server like MAMP, XAMPP, or WAMP to host your MySQL database. Make sure to update the database connection details in the `application.properties` (or **.env**) file.
+
+3. **Configure your MySQL database:**
+    - Open the `application.properties` (or **.env**) file and update it with the following details:
+
+        - **Database URL**:
+          ```properties
+          spring.datasource.url=${SPRING_DATASOURCE_URL}
+          ```  
+          *Example for MAMP*:
+          ```properties
+          spring.datasource.url=jdbc:mysql://localhost:8889/rental?serverTimezone=UTC&createDatabaseIfNotExist=true
+          ```
+
+        - **Your DB Username**:
+          ```properties
+          spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
+          ```
+
+        - **Your DB Password**:
+          ```properties
+          spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
+          ```
+
+        - **JWT Secret Key** (Ensure the key is sufficiently long and encoded in **Base64** for it to work properly. The key should be **256 bits** long for the **HS256** algorithm):
+          ```properties
+          security.jwt.secret-key=${SECURITY_JWT_SECRET_KEY}
+          ```
+4. Install the project dependencies by running the following command:
 `   mvn clean install`
-4. Start the application by running:
+5. When the build is completed, you can start the application by running:
   ` mvn spring-boot:run`
+6. The application will run and the database will then be created.
+
 
 ## **Project Structure**
 
@@ -43,6 +70,7 @@ To install and run the project, follow these steps:
 - **Spring Security** : Provides endpoint security.
 - **Spring Data JPA** : Enables database interaction using JPA.
 - **MySQL Connector** : Handles connexion to the MySQL database.
+
 
 ## API Documentation
 

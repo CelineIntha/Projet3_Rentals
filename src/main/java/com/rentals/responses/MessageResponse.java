@@ -1,10 +1,14 @@
 package com.rentals.responses;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
 public class MessageResponse {
-    private String message;
+
+    private final String message;
+
+    public MessageResponse(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

@@ -1,13 +1,9 @@
 package com.rentals.responses;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
 
-@Setter
-@Getter
 public class ErrorResponse {
+
     private int status;
     private String message;
     private LocalDateTime timestamp;
@@ -18,4 +14,27 @@ public class ErrorResponse {
         this.timestamp = LocalDateTime.now();
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 }

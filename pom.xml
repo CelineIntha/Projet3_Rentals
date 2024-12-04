@@ -4,12 +4,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- Déclaration du parent Spring Boot -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.3.5</version>
-		<relativePath/> <!-- Recherche le parent dans le repository -->
+		<relativePath/>
 	</parent>
 
 	<groupId>com.rentals</groupId>

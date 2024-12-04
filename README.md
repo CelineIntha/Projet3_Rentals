@@ -23,10 +23,11 @@ To run this project, ensure you have the following installed on your machine:
 
 To install and run the project, follow these steps:
 
-1. Clone this repository to your local machine.
-2. You can use a local server like MAMP, XAMPP, or WAMP to host your MySQL database. Make sure to update the database connection details in the `application.properties` (or **.env**) file.
+1. If you want to test the front-end Angular application with this API, please clone this repository first : https://github.com/OpenClassrooms-Student-Center/Developpez-le-back-end-en-utilisant-Java-et-Spring
+2. Then, clone this repository to your local machine.
+3. You can use a local server like MAMP, XAMPP, or WAMP to host your MySQL database. Make sure to update the database connection details in the `application.properties` (or **.env**) file.
 
-3. **Configure your MySQL database:**
+4. **Configure your MySQL database:**
     - Open the `application.properties` (or **.env**) file and update it with the following details:
 
         - **Database URL**:
@@ -52,11 +53,11 @@ To install and run the project, follow these steps:
           ```properties
           security.jwt.secret-key=${SECURITY_JWT_SECRET_KEY}
           ```
-4. Install the project dependencies by running the following command:
+5. Install the project dependencies by running the following command:
 `   mvn clean install`
-5. When the build is completed, you can start the application by running:
+6. When the build is completed, you can start the application by running:
   ` mvn spring-boot:run`
-6. The application will run and the database will then be created.
+7. The application will run and the database will then be created.
 
 
 ## **Project Structure**

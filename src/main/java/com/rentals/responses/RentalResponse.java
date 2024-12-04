@@ -14,7 +14,6 @@ public class RentalResponse {
     private String created_at;
     private String updated_at;
 
-    // Constructeur
     public RentalResponse(Integer id, String name, BigDecimal surface, BigDecimal price, String picture, String description, Integer owner_id, String created_at, String updated_at) {
         this.id = id;
         this.name = name;

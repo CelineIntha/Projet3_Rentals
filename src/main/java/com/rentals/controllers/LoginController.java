@@ -68,12 +68,10 @@ public class LoginController {
             )
     })
     public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
-        logger.info("Attempting to authenticate user: {}", loginUserDto.getEmail());
 
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         if (authenticatedUser == null) {
-            logger.warn("Authentication failed for user: {}", loginUserDto.getEmail());
             throw new UnauthorizedException("Invalid email or password.");
         }
 
@@ -83,7 +81,6 @@ public class LoginController {
                 .setToken(jwtToken)
                 .setExpiresIn(jwtService.getExpirationTime());
 
-        logger.info("Authentication successful for user: {}", loginUserDto.getEmail());
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -105,10 +102,8 @@ public class LoginController {
             )
     })
     public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
-        logger.info("Attempting to register user with email: {}", registerUserDto.getEmail());
 
         if (userService.findByEmail(registerUserDto.getEmail()) != null) {
-            logger.warn("Registration failed: email already exists: {}", registerUserDto.getEmail());
             return ResponseEntity.badRequest().body(Map.of(
                     "message", "An account with this email address already exists."
             ));
@@ -126,8 +121,6 @@ public class LoginController {
                     registeredUser.getCreatedAt().format(dateFormatter),
                     registeredUser.getUpdatedAt().format(dateFormatter)
             );
-
-            logger.info("User registered successfully with email: {}", registerUserDto.getEmail());
 
             return ResponseEntity.ok(Map.of(
                     "user", userResponse,

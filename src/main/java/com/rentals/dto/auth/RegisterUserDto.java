@@ -5,14 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 
 public class RegisterUserDto {
 
-    @Email(message = "L'adresse email doit être valide")
-    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "The email address must be valid")
+    @NotBlank(message = "Email is required")
     private String email;
 
-    @NotBlank(message = "Le nom est obligatoire")
+    @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "Le mot de passe est obligatoire")
+    @NotBlank(message = "Password is required")
     private String password;
 
     public String getEmail() {

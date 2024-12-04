@@ -36,7 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         final String requestPath = request.getRequestURI();
 
-        // J'ignore le filtrage pour les routes /register, /login /images et swagger
         if (requestPath.startsWith("/api/auth/register") || requestPath.startsWith("/api/auth/login") || requestPath.startsWith("/swagger-ui") || request.getRequestURI().startsWith("/v3/api-docs") || requestPath.startsWith("/api/rentals/images/")){
             filterChain.doFilter(request, response);
             return;

@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/rentals")
@@ -141,10 +141,17 @@ public class RentalController {
                 if (Files.notExists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
-                Path imagePath = uploadDir.resolve(Objects.requireNonNull(rentalDTO.getPicture().getOriginalFilename()));
+
+                String originalFilename = rentalDTO.getPicture().getOriginalFilename();
+                assert originalFilename != null;
+                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                String uniqueFilename = UUID.randomUUID() + extension;
+
+                Path imagePath = uploadDir.resolve(uniqueFilename);
+
                 Files.copy(rentalDTO.getPicture().getInputStream(), imagePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-                pictureUrl = baseUrl + "/api/rentals/images/" + rentalDTO.getPicture().getOriginalFilename();
+                pictureUrl = baseUrl + "/api/rentals/images/" + uniqueFilename;
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -199,10 +206,17 @@ public class RentalController {
                 if (Files.notExists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
-                Path imagePath = uploadDir.resolve(Objects.requireNonNull(rentalDTO.getPicture().getOriginalFilename()));
+
+                String originalFilename = rentalDTO.getPicture().getOriginalFilename();
+                assert originalFilename != null;
+                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                String uniqueFilename = UUID.randomUUID() + extension;
+
+                Path imagePath = uploadDir.resolve(uniqueFilename);
+
                 Files.copy(rentalDTO.getPicture().getInputStream(), imagePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-                String pictureUrl = baseUrl + "/api/rentals/images/" + rentalDTO.getPicture().getOriginalFilename();
+                String pictureUrl = baseUrl + "/api/rentals/images/" + uniqueFilename;
                 updateRental.setPicture(pictureUrl);
             }
 
@@ -212,7 +226,6 @@ public class RentalController {
             return ResponseEntity.status(HttpStatus.OK).body(response);
 
         } catch (IOException e) {
-            logger.error("Error while uploading picture: {}", e.getMessage(), e);
             throw new RuntimeException("Error while uploading picture");
         }
     }
